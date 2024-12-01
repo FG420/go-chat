@@ -1,7 +1,7 @@
 package main
 
-import "log"
+import "github.com/GF420/go-chat/server"
 
 func main() {
-	log.Print("go-chat")
+	server.Inizialiaze()
 }

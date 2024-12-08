@@ -5,3 +5,7 @@ type Transaction struct {
 	ToPubKey   []byte
 	Data       []byte
 }
+
+func NewTransaction(fromKey, toKey, data []byte) *Transaction {
+	return &Transaction{fromKey, toKey, data}
+}

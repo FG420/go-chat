@@ -1,15 +1,25 @@
 package blockchain
 
+import (
+	"time"
+)
+
 type Block struct {
-	Hash        []byte
-	PrevHash    []byte
-	Transaction *Transaction
-	Timestamp   int64
+	PrevHash     []byte
+	Hash         []byte
+	Transactions []*Transaction
+	Timestamp    int64
 }
 
-// func AddBlock(prevHash []byte, tx *Transaction) *Block {
-// 	block := &Block{[]byte{}, prevHash, tx, time.Now().Unix()}
-// 	pow := NewProof(block)
+func CreateBlock(prevHash []byte, txs []*Transaction) *Block {
+	block := &Block{prevHash, []byte{}, txs, time.Now().Unix()}
+	p := NewProof(block)
+	hash := p.Run()
+	block.Hash = hash
 
-// 	block.Hash =
-// }
+	return block
+}
+
+func GenesisBlock() *Block {
+	return CreateBlock(nil, []*Transaction{})
+}

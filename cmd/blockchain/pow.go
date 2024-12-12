@@ -24,11 +24,11 @@ func (pow *ProofOfWork) Run() []byte {
 	for random < math.MaxInt64 {
 		data := pow.InitData(random)
 		hash := sha256.Sum256(data)
-
 		fmt.Printf("\r%x", hash)
 		intHash.SetBytes(hash[:])
+
 		if intHash.Cmp(pow.Target) == -1 {
-			break
+			return hash[:]
 		} else {
 			random++
 		}
@@ -41,15 +41,18 @@ func (pow *ProofOfWork) InitData(num int) []byte {
 	data := bytes.Join(
 		[][]byte{
 			pow.Block.PrevHash,
+			pow.Block.Hash,
+			{byte(pow.Block.Timestamp)},
 			ToHex(int64(num)),
 		}, []byte{})
 	return data
 }
 
 func NewProof(b *Block) *ProofOfWork {
-	source := rand.Intn(100 - 10)
+	source := rand.Intn(20)
 	t := big.NewInt(1)
-	log.Println(t, source)
+	// log.Print(num)
+	// log.Println(t, source)
 	t.Lsh(t, uint(256-source))
 	log.Println(t)
 

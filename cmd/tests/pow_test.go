@@ -12,6 +12,7 @@ func TestProofOfWork(t *testing.T) {
 	pow := blockchain.NewProof(b)
 	hash := pow.Run()
 
-	log.Println("POW -> ", pow)
+	log.Println("POW Block -> ", pow.Block)
+	log.Println("POW Target -> ", pow.Target)
 	log.Println("HASH -> ", hash)
 }

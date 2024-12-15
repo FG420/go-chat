@@ -9,6 +9,7 @@ import (
 
 func TestNewWallet(t *testing.T) {
 	pino := blockchain.NewWallet()
-	log.Println(pino.PubKey)
-	log.Println(pino.PrivKey)
+	gino := blockchain.NewWallet()
+	log.Println("Pino -> ", pino)
+	log.Println("Gino -> ", gino)
 }

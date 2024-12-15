@@ -12,3 +12,7 @@ blockchain:
 POW DONE! for now...
 
 maybe adding the TxInput && TxOutput for chat purposes...
+
+!!!!! TODO NOW !!!!!
+
+    create chain.go logic

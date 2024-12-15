@@ -1,8 +1,11 @@
 package blockchain
 
 import (
+	"bytes"
 	"crypto/sha256"
+	"encoding/gob"
 	"fmt"
+	"log"
 	"time"
 )
 
@@ -11,6 +14,28 @@ type Block struct {
 	Hash         []byte
 	Transactions []Transaction
 	Timestamp    int64
+}
+
+func (b *Block) Serialize() []byte {
+	var buf bytes.Buffer
+	enc := gob.NewEncoder(&buf)
+	err := enc.Encode(b)
+	if err != nil {
+		log.Panic("Error during encoding")
+	}
+
+	return buf.Bytes()
+}
+
+func Deserialize(data []byte) *Block {
+	var b Block
+	dec := gob.NewDecoder(bytes.NewReader(data))
+	err := dec.Decode(&b)
+	if err != nil {
+		log.Panic("error during decoding")
+	}
+
+	return &b
 }
 
 func CreateBlock(prevBlock *Block, txs []Transaction) *Block {
@@ -24,9 +49,9 @@ func CreateBlock(prevBlock *Block, txs []Transaction) *Block {
 
 func GenesisBlock() *Block {
 	gen := Block{
-		PrevHash:     make([]byte, 0),
+		PrevHash:     nil,
 		Hash:         nil,
-		Transactions: []Transaction{{nil, nil, "Genesis Block"}},
+		Transactions: []Transaction{{nil, nil, "Blockchain Inizialized"}},
 		Timestamp:    time.Now().Unix(),
 	}
 

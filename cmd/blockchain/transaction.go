@@ -3,9 +3,9 @@ package blockchain
 type Transaction struct {
 	FromPubKey []byte
 	ToPubKey   []byte
-	Data       string
+	Data       any
 }
 
-func NewTransaction(fromKey, toKey []byte, data string) *Transaction {
+func (tx *Transaction) NewTransaction(fromKey, toKey []byte, data any) *Transaction {
 	return &Transaction{fromKey, toKey, data}
 }

@@ -1,6 +1,7 @@
 package blockchain
 
 import (
+	"bytes"
 	"log"
 )
 
@@ -12,16 +13,19 @@ type Blockchain struct {
 func (chain *Blockchain) AddBlock(b *Block) *Blockchain {
 	var block Block = *b
 
+	if !bytes.Equal(chain.LastHash, b.PrevHash) {
+		log.Panic("Error the last hash and the previous block hash do not match!")
+	}
 	chain.Blocks = append(chain.Blocks, block)
-	chain.LastHash = block.Hash
+	chain.LastHash = b.Hash
 
+	log.Printf("\n\tLast Hash ->\t%x\n", chain.LastHash)
 	return chain
 }
 
 func (chain *Blockchain) Format() {
 	for _, block := range chain.Blocks {
-		log.Printf("\nLast Hash ->\t%x\nBlocks:\n\t- PrevHash ->\t%x\n\t- Hash ->\t%x\n\t- Timestamp ->\t%d\n\t- Transactions ->\t%s",
-			chain.LastHash,
+		log.Printf("\nBlock:\n\t- PrevHash ->\t%x\n\t- Hash ->\t%x\n\t- Timestamp ->\t%d\n\t- Transactions ->\t%s",
 			block.PrevHash,
 			block.Hash,
 			block.Timestamp,
@@ -29,8 +33,13 @@ func (chain *Blockchain) Format() {
 	}
 }
 
-func Inizialized() *Blockchain {
-	// var chain Blockchain
-	// gen := GenesisBlock()
-	return &Blockchain{}
+// func Inizialize() *Blockchain {
+// 	var chain Blockchain
+// 	gen := GenesisBlock()
+// 	chain.AddBlock(gen)
+// 	return &chain
+// }
+
+func (chain *Blockchain) Init() *Blockchain {
+	return chain.AddBlock(GenesisBlock())
 }

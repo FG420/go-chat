@@ -18,18 +18,21 @@ func (chain *Blockchain) AddBlock(b *Block) *Blockchain {
 	}
 	chain.Blocks = append(chain.Blocks, block)
 	chain.LastHash = b.Hash
-
-	log.Printf("\n\tLast Hash ->\t%x\n", chain.LastHash)
 	return chain
 }
 
 func (chain *Blockchain) Format() {
 	for _, block := range chain.Blocks {
-		log.Printf("\nBlock:\n\t- PrevHash ->\t%x\n\t- Hash ->\t%x\n\t- Timestamp ->\t%d\n\t- Transactions ->\t%s",
-			block.PrevHash,
-			block.Hash,
-			block.Timestamp,
-			block.Transactions)
+		for _, tx := range block.Transactions {
+			log.Printf("\nBlock:\n\t- PrevHash ->\t%x\n\t- Hash ->\t%x\n\t- Timestamp ->\t%d"+
+				"\n\t- Transactions:\n\t\t- FromKey ->\t%x\n\t\t- ToKey ->\t%x\n\t\t- Data ->\t%s",
+				block.PrevHash,
+				block.Hash,
+				block.Timestamp,
+				tx.FromPubKey,
+				tx.ToPubKey,
+				tx.Data)
+		}
 	}
 }
 

@@ -15,14 +15,14 @@ func TestGenesis(t *testing.T) {
 
 func TestCreateNewBlock(t *testing.T) {
 	gen := blockchain.GenesisBlock()
-	newB := blockchain.CreateBlock(gen, []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "New Block"}})
+	newB := blockchain.CreateBlock(gen, &blockchain.Transaction{FromPubKey: nil, ToPubKey: nil, Data: "New Block"})
 
 	log.Println("New Block -> ", newB)
 }
 
 func TestSerializeBlock(t *testing.T) {
 	gen := blockchain.GenesisBlock()
-	newB := blockchain.CreateBlock(gen, []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "Block 2"}})
+	newB := blockchain.CreateBlock(gen, &blockchain.Transaction{FromPubKey: nil, ToPubKey: nil, Data: "Block 2"})
 	hashedB := newB.Serialize()
 
 	log.Println("Hashed Block -> ", hashedB)

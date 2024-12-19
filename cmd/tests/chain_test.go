@@ -11,10 +11,12 @@ func TestAddBlock(t *testing.T) {
 	var bc blockchain.Blockchain
 	bc.Init()
 
-	newB := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "Block 2"}})
+	newB := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], &blockchain.Transaction{FromPubKey: nil, ToPubKey: nil, Data: "Mona"})
+	// newB := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "Block 2"}})
 	bc.AddBlock(newB)
 
-	newB2 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "Block 3"}})
+	// newB2 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], []blockchain.Transaction{{FromPubKey: nil, ToPubKey: nil, Data: "Block 3"}})
+	newB2 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], &blockchain.Transaction{FromPubKey: nil, ToPubKey: nil, Data: "Block 3"})
 	bc.AddBlock(newB2)
 
 	bc.Format()

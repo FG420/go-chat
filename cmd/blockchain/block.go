@@ -12,9 +12,12 @@ import (
 type Block struct {
 	PrevHash     []byte
 	Hash         []byte
-	Transactions []Transaction
+	Transactions []*Transaction
 	Timestamp    int64
 }
+
+// func (b *Block) AddTransaction(tx *Transaction) *Block {
+// }
 
 func (b *Block) Serialize() []byte {
 	var buf bytes.Buffer
@@ -38,7 +41,9 @@ func Deserialize(data []byte) *Block {
 	return &b
 }
 
-func CreateBlock(prevBlock *Block, txs []Transaction) *Block {
+func CreateBlock(prevBlock *Block, tx *Transaction) *Block {
+	var txs []*Transaction
+	txs = append(txs, tx)
 	block := &Block{prevBlock.Hash, []byte{}, txs, time.Now().Unix()}
 	p := NewProof(block)
 	hash := p.Run()
@@ -51,11 +56,11 @@ func GenesisBlock() *Block {
 	gen := Block{
 		PrevHash:     nil,
 		Hash:         nil,
-		Transactions: []Transaction{{nil, nil, "Blockchain Inizialized"}},
+		Transactions: []*Transaction{{nil, nil, "Blockchain Inizialized"}},
 		Timestamp:    time.Now().Unix(),
 	}
 
-	sGb := string(gen.PrevHash) + fmt.Sprint(gen.Timestamp) + string(len(gen.Transactions))
+	sGb := string(gen.PrevHash) + fmt.Sprint(gen.Timestamp) + fmt.Sprint(len(gen.Transactions))
 	hash := sha256.Sum256([]byte(sGb))
 	gen.Hash = hash[:]
 

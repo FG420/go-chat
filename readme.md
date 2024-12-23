@@ -15,4 +15,4 @@ maybe adding the TxInput && TxOutput for chat purposes...
 
 !!!!! TODO NOW !!!!!
 
-    create chain.go logic
+    remeber to endode the messages before saving them into the chain and when the toPubKey user reads them decode em with his pub key!  

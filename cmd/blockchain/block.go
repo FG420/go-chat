@@ -16,8 +16,15 @@ type Block struct {
 	Timestamp    int64
 }
 
-// func (b *Block) AddTransaction(tx *Transaction) *Block {
-// }
+func (b *Block) AddTransaction(tx *Transaction) *Block {
+	if !bytes.Equal(b.Transactions[len(b.Transactions)-1].FromPubKey, tx.FromPubKey) {
+		log.Panic("Error Block not found")
+	}
+
+	b.Transactions = append(b.Transactions, tx)
+
+	return b
+}
 
 func (b *Block) Serialize() []byte {
 	var buf bytes.Buffer
@@ -56,7 +63,7 @@ func GenesisBlock() *Block {
 	gen := Block{
 		PrevHash:     nil,
 		Hash:         nil,
-		Transactions: []*Transaction{{nil, nil, "Blockchain Inizialized"}},
+		Transactions: []*Transaction{{nil, nil, "Blockchain Inizialized", time.Now().Unix()}},
 		Timestamp:    time.Now().Unix(),
 	}
 

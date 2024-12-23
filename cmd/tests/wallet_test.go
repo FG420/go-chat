@@ -3,6 +3,7 @@ package tests
 import (
 	"log"
 	"testing"
+	"time"
 
 	"github.com/GF420/go-chat/cmd/blockchain"
 )
@@ -19,21 +20,6 @@ func TestNewWallet(t *testing.T) {
 	// log.Println("Gino -> ", gino)
 }
 
-// func TestWalletNewTx(t *testing.T) {
-// 	pino, bc := blockchain.NewWallet()
-// 	gino, bc1 := blockchain.NewWallet()
-
-// 	bc.Init()
-// 	bc1.Init()
-
-// 	data := "Sei un coglione"
-// 	b := pino.SendData(&bc.Blocks[len(bc.Blocks)-1], gino.PubKey, data)
-// 	b1 := gino.ReceivedData(&bc1.Blocks[len(bc1.Blocks)-1], pino.PubKey, data)
-
-// 	log.Println("sender -> ", bc.AddBlock(b))
-// 	log.Println("receiver -> ", bc1.AddBlock(b1))
-// }
-
 func TestSend(t *testing.T) {
 	pino, bc := blockchain.NewWallet()
 	gino, bc1 := blockchain.NewWallet()
@@ -41,12 +27,12 @@ func TestSend(t *testing.T) {
 	bc.Init()
 	bc1.Init()
 
-	data := "Sei un coglione"
+	data := "Sei un mona"
 	tx := pino.Send(gino.PubKey, data)
 	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
 	bc.AddBlock(b)
 
-	data = "Sei un ebete o abete?"
+	data = "Sei un pino o un abete?"
 	tx = pino.Send(gino.PubKey, data)
 	b1 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
 	bc.AddBlock(b1)
@@ -54,43 +40,26 @@ func TestSend(t *testing.T) {
 	bc.Format()
 }
 
-func TestReceive(t *testing.T) {
+func TestMultipleSend(t *testing.T) {
 	pino, bc := blockchain.NewWallet()
-	gino, bc1 := blockchain.NewWallet()
+	gino, _ := blockchain.NewWallet()
 
 	bc.Init()
-	bc1.Init()
-
-	data := "Sei un coglione"
-	tx := pino.Receive(gino.PubKey, data)
-	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
-	bc.AddBlock(b)
-
-	data = "Sei un ebete o abete?"
-	tx = pino.Receive(gino.PubKey, data)
-	b1 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
-	bc.AddBlock(b1)
-
-	bc.Format()
-}
-
-func TestSendReceive(t *testing.T) {
-	pino, bc := blockchain.NewWallet()
-	gino, bc1 := blockchain.NewWallet()
-
-	bc.Init()
-	bc1.Init()
-
-	data := "Sei un coglione"
+	data := "mona coglione"
 	tx := pino.Send(gino.PubKey, data)
 	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
+
+	time.Sleep(500)
+	data1 := "cazzone che sei, scemo"
+	tx1 := pino.Send(gino.PubKey, data1)
+	b.AddTransaction(tx1)
+
+	time.Sleep(500)
+	data2 := "però ti voglio pene!"
+	tx2 := pino.Send(gino.PubKey, data2)
+	b.AddTransaction(tx2)
+
 	bc.AddBlock(b)
-
-	data = "Sei un ebete o abete?"
-	tx = pino.Receive(gino.PubKey, data)
-	b1 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
-	bc.AddBlock(b1)
-
 	bc.Format()
 
 }

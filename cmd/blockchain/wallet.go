@@ -37,15 +37,3 @@ func (w *Wallet) Receive(receiverKey []byte, data any) *Transaction {
 	var tx Transaction
 	return tx.NewTransaction(receiverKey, w.PubKey, data)
 }
-
-// func (w *Wallet) SendData(prevB *Block, receiverKey []byte, data any) *Block {
-// 	return CreateBlock(prevB, []Transaction{{FromPubKey: w.PubKey, ToPubKey: receiverKey, Data: data}})
-// }
-
-// func (w *Wallet) ReceivedData(prevB *Block, senderKey []byte, data any) *Block {
-// 	return CreateBlock(prevB, []Transaction{{FromPubKey: senderKey, ToPubKey: w.PubKey, Data: data}})
-// }
-
-// func GetWallets() Wallets {
-
-// }

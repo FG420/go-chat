@@ -15,19 +15,19 @@ type Room struct {
 	unregister chan *Chatter
 }
 
-func newRoom() *Room {
+func NewRoom() *Room {
 	source := rand.NewSource(time.Now().Unix())
 	r := rand.New(source)
 	return &Room{
 		ID:         strconv.Itoa(r.Int()),
-		chatters:   make(map[*Chatter]bool),
 		broadcast:  make(chan []byte),
 		register:   make(chan *Chatter),
 		unregister: make(chan *Chatter),
+		chatters:   make(map[*Chatter]bool),
 	}
 }
 
-func (r *Room) run() {
+func (r *Room) Run() {
 	for {
 		select {
 		case chatter := <-r.register:
@@ -43,9 +43,6 @@ func (r *Room) run() {
 			for chatter := range r.chatters {
 				select {
 				case chatter.send <- message:
-					for chatter := range r.chatters {
-						r.broadcast := <-message
-					}
 				default:
 					close(chatter.send)
 					delete(r.chatters, chatter)

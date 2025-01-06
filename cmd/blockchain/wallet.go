@@ -18,14 +18,14 @@ type (
 	// }
 )
 
-func NewWallet() (*Wallet, *Blockchain) {
+func NewWallet() *Wallet {
 	private, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err != nil {
 		log.Panic(err)
 	}
 	public := append(private.X.Bytes(), private.Y.Bytes()...)
 
-	return &Wallet{public, private}, &Blockchain{}
+	return &Wallet{public, private}
 }
 
 func (w *Wallet) Send(toPubKey []byte, data any) *Transaction {

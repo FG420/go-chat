@@ -9,23 +9,23 @@ import (
 )
 
 func TestNewWallet(t *testing.T) {
-	pino, bc := blockchain.NewWallet()
+	bc := blockchain.Inizialize()
+	pino := blockchain.NewWallet()
 	// gino,bc := blockchain.NewWallet()
 
 	// bc := blockchain.Inizialize()
 
-	log.Println(bc.Init())
+	log.Println(bc)
 
 	log.Println("Pino -> ", pino)
 	// log.Println("Gino -> ", gino)
 }
 
 func TestSend(t *testing.T) {
-	pino, bc := blockchain.NewWallet()
-	gino, bc1 := blockchain.NewWallet()
-
-	bc.Init()
-	bc1.Init()
+	bc := blockchain.Inizialize()
+	bc1 := blockchain.Inizialize()
+	pino := blockchain.NewWallet()
+	gino := blockchain.NewWallet()
 
 	data := "Sei un mona"
 	tx := pino.Send(gino.PubKey, data)
@@ -34,17 +34,17 @@ func TestSend(t *testing.T) {
 
 	data = "Sei un pino o un abete?"
 	tx = pino.Send(gino.PubKey, data)
-	b1 := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
+	b1 := blockchain.CreateBlock(&bc1.Blocks[len(bc.Blocks)-1], tx)
 	bc.AddBlock(b1)
 
 	bc.Format()
 }
 
 func TestMultipleSend(t *testing.T) {
-	pino, bc := blockchain.NewWallet()
-	gino, _ := blockchain.NewWallet()
+	bc := blockchain.Inizialize()
+	pino := blockchain.NewWallet()
+	gino := blockchain.NewWallet()
 
-	bc.Init()
 	data := "mona coglione"
 	tx := pino.Send(gino.PubKey, data)
 	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)

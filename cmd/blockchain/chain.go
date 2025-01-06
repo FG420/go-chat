@@ -38,12 +38,10 @@ func (chain *Blockchain) Format() {
 	}
 }
 
-// func Inizialize() *Blockchain {
-// 	var chain Blockchain
-// 	gen := GenesisBlock()
-// 	chain.AddBlock(gen)
-// 	return &chain
-// }
+func Inizialize() *Blockchain {
+	var chain Blockchain
+	return chain.AddBlock(GenesisBlock())
+}
 
 func (chain *Blockchain) Init() *Blockchain {
 	return chain.AddBlock(GenesisBlock())

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"math"
 	"math/big"
@@ -24,7 +23,7 @@ func (pow *ProofOfWork) Run() []byte {
 	for random < math.MaxInt64 {
 		data := pow.InitData(random)
 		hash := sha256.Sum256(data)
-		fmt.Printf("\r%x", hash)
+		// fmt.Printf("\r%x", hash)
 		intHash.SetBytes(hash[:])
 
 		if intHash.Cmp(pow.Target) == -1 {

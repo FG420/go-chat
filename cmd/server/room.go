@@ -1,6 +1,7 @@
 package server
 
 import (
+	"log"
 	"strconv"
 	"time"
 
@@ -41,8 +42,10 @@ func (r *Room) Run() {
 
 		case message := <-r.broadcast:
 			for chatter := range r.chatters {
+				// log.Println("chatter send -> ", chatter.send)
 				select {
 				case chatter.send <- message:
+					log.Println("mona")
 				default:
 					close(chatter.send)
 					delete(r.chatters, chatter)

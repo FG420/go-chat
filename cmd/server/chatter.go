@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
@@ -24,17 +25,41 @@ type (
 		blockchain *blockchain.Blockchain
 	}
 
-	Welcome struct {
-		Greeting string
-		User     []byte
-	}
-
-	MessageType struct {
+	Message struct {
 		User      []byte
 		Text      string
 		Timestamp time.Time
 	}
 )
+
+// func (chatter *Chatter) Read() {
+// 	defer func() {
+// 		chatter.room.unregister <- chatter
+// 		chatter.conn.Close()
+// 	}()
+
+// 	for {
+// 		_, mess, err := chatter.conn.ReadMessage()
+// 		if err != nil {
+// 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+// 				log.Printf("error: %v", err)
+// 			} else {
+// 				log.Panic(err)
+// 			}
+// 			break
+// 		}
+
+// 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
+// 		// Invia la coppia messaggio + chatter
+// 		chatter.room.broadcast <- struct {
+// 			Message []byte
+// 			Sender  *Chatter
+// 		}{
+// 			Message: mess,
+// 			Sender:  chatter,
+// 		}
+// 	}
+// }
 
 func (chatter *Chatter) Read() {
 	defer func() {
@@ -43,8 +68,7 @@ func (chatter *Chatter) Read() {
 	}()
 
 	for {
-
-		t, mess, err := chatter.conn.ReadMessage()
+		_, mess, err := chatter.conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
@@ -53,25 +77,27 @@ func (chatter *Chatter) Read() {
 			}
 			break
 		}
-		log.Println(t, string(mess))
 
 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
-		chatter.room.broadcast <- mess
+		chatter.room.broadcast <- struct {
+			Message []byte
+			Sender  *Chatter
+		}{
+			Message: mess,
+			Sender:  chatter,
+		}
+
 	}
 }
 
 func (chatter *Chatter) Write() {
-	ticker := time.NewTicker(180 * time.Second)
+	ticker := time.NewTicker(60 * time.Second)
 	defer func() {
 		ticker.Stop()
 		chatter.conn.Close()
 	}()
 
-	// log.Println("Chatter Wallet -> ", chatter.wallet)
-
 	log.Println(chatter.room.chatters)
-	// b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], &blockchain.Transaction{})
-	// bc.AddBlock(b)
 
 	for {
 		select {
@@ -81,36 +107,41 @@ func (chatter *Chatter) Write() {
 				return
 			}
 
-			if err := chatter.conn.WriteJSON(MessageType{User: chatter.wallet.PubKey, Text: string(mess), Timestamp: time.Now()}); err != nil {
+			message := Message{}
+			writer, err := chatter.conn.NextWriter(websocket.TextMessage)
+			if err != nil {
 				return
 			}
-			// writer, err := chatter.conn.NextWriter(websocket.TextMessage)
-			// if err != nil {
-			// 	return
-			// }
-			// writer.Write(mess)
-			// tx := chatter.wallet.Send(wallet.PubKey, <-chatter.send)
-			// b.AddTransaction(tx)
-			// log.Println("Block -> ", b)
 
-			for cha := range chatter.room.chatters {
-				if cha.wallet != chatter.wallet {
-					tx := chatter.wallet.Send(cha.wallet.PubKey, mess)
-					chatter.blockchain.AddBlock(blockchain.CreateBlock(
-						&chatter.blockchain.Blocks[len(chatter.blockchain.Blocks)-1], tx))
+			for c := range chatter.room.chatters {
+				log.Println(!bytes.Equal(chatter.wallet.PubKey, c.wallet.PubKey))
+				if !bytes.Equal(chatter.wallet.PubKey, c.wallet.PubKey) {
+
+					// tx := chatter.wallet.Send(c.wallet.PubKey, mess)
+					// chatter.blockchain.AddBlock(blockchain.CreateBlock(
+					// 	&chatter.blockchain.Blocks[len(chatter.blockchain.Blocks)-1], tx))
+
+					message.User = chatter.wallet.PubKey
+					message.Text = string(mess)
+					message.Timestamp = time.Now()
 				}
 			}
 
-			// log.Println(chatter.blockchain)
+			byted, err := json.Marshal(message)
+			if err != nil {
+				log.Panic(err)
+			}
+			writer.Write(byted)
 
-			// for i := 0; i < len(chatter.send); i++ {
-			// 	writer.Write([]byte{'\n'})
-			// 	writer.Write(<-chatter.send)
-			// }
+			for i := 0; i < len(chatter.send); i++ {
+				writer.Write([]byte{'\n'})
+				writer.Write(<-chatter.send)
+			}
 
-			// if err := writer.Close(); err != nil {
-			// 	return
-			// }
+			if err := writer.Close(); err != nil {
+				return
+			}
+
 		case <-ticker.C:
 			chatter.conn.SetWriteDeadline(time.Now().Add(15 * time.Second))
 			if err := chatter.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
@@ -128,15 +159,17 @@ func Inizialiaze(room *Room, w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	chatter := &Chatter{room: room, conn: conn, send: make(chan []byte, 256), wallet: blockchain.NewWallet(), blockchain: blockchain.Inizialize()}
+	chatter := &Chatter{room: room, conn: conn, send: make(chan []byte, 256),
+		wallet: blockchain.NewWallet(), blockchain: blockchain.Inizialize()}
 	chatter.room.register <- chatter
 
-	greet := Welcome{
-		Greeting: "Welcome",
-		User:     chatter.wallet.PubKey,
+	greet := Message{
+		User:      chatter.wallet.PubKey,
+		Text:      "Welcome Muddafakka",
+		Timestamp: time.Now(),
 	}
-
 	chatter.conn.WriteJSON(greet)
+
 	go chatter.Read()
 	go chatter.Write()
 }

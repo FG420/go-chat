@@ -1,7 +1,6 @@
 package tests
 
 import (
-	"log"
 	"testing"
 
 	"github.com/GF420/go-chat/cmd/blockchain"
@@ -20,5 +19,5 @@ func TestAddBlock(t *testing.T) {
 	bc.AddBlock(newB2)
 
 	bc.Format()
-	log.Println(bc)
+	// log.Println(bc)
 }

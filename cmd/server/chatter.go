@@ -14,6 +14,7 @@ import (
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  1024,
 	WriteBufferSize: 1024,
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
 type (
@@ -26,40 +27,11 @@ type (
 	}
 
 	Message struct {
-		User      []byte
-		Text      string
-		Timestamp time.Time
+		User      []byte    `json:"user"`
+		Text      string    `json:"text"`
+		Timestamp time.Time `json:"timestamp"`
 	}
 )
-
-// func (chatter *Chatter) Read() {
-// 	defer func() {
-// 		chatter.room.unregister <- chatter
-// 		chatter.conn.Close()
-// 	}()
-
-// 	for {
-// 		_, mess, err := chatter.conn.ReadMessage()
-// 		if err != nil {
-// 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-// 				log.Printf("error: %v", err)
-// 			} else {
-// 				log.Panic(err)
-// 			}
-// 			break
-// 		}
-
-// 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
-// 		// Invia la coppia messaggio + chatter
-// 		chatter.room.broadcast <- struct {
-// 			Message []byte
-// 			Sender  *Chatter
-// 		}{
-// 			Message: mess,
-// 			Sender:  chatter,
-// 		}
-// 	}
-// }
 
 func (chatter *Chatter) Read() {
 	defer func() {
@@ -72,8 +44,10 @@ func (chatter *Chatter) Read() {
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
+				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
 			} else {
-				log.Panic(err)
+				log.Printf("error: %v", err)
+				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
 			}
 			break
 		}
@@ -91,7 +65,7 @@ func (chatter *Chatter) Read() {
 }
 
 func (chatter *Chatter) Write() {
-	ticker := time.NewTicker(60 * time.Second)
+	ticker := time.NewTicker(3600 * time.Second)
 	defer func() {
 		ticker.Stop()
 		chatter.conn.Close()
@@ -116,10 +90,6 @@ func (chatter *Chatter) Write() {
 			for c := range chatter.room.chatters {
 				log.Println(!bytes.Equal(chatter.wallet.PubKey, c.wallet.PubKey))
 				if !bytes.Equal(chatter.wallet.PubKey, c.wallet.PubKey) {
-
-					// tx := chatter.wallet.Send(c.wallet.PubKey, mess)
-					// chatter.blockchain.AddBlock(blockchain.CreateBlock(
-					// 	&chatter.blockchain.Blocks[len(chatter.blockchain.Blocks)-1], tx))
 
 					message.User = chatter.wallet.PubKey
 					message.Text = string(mess)
@@ -152,24 +122,62 @@ func (chatter *Chatter) Write() {
 }
 
 func Inizialiaze(room *Room, w http.ResponseWriter, req *http.Request) {
-
 	conn, err := upgrader.Upgrade(w, req, nil)
 	if err != nil {
 		log.Printf("Error during connection upgrade: %s", err)
 		return
 	}
 
-	chatter := &Chatter{room: room, conn: conn, send: make(chan []byte, 256),
-		wallet: blockchain.NewWallet(), blockchain: blockchain.Inizialize()}
+	chatter := &Chatter{
+		room:       room,
+		conn:       conn,
+		send:       make(chan []byte, 256),
+		wallet:     blockchain.NewWallet(),
+		blockchain: blockchain.Inizialize(),
+	}
+
 	chatter.room.register <- chatter
 
+	// text := "Connected"
 	greet := Message{
-		User:      chatter.wallet.PubKey,
-		Text:      "Welcome Muddafakka",
-		Timestamp: time.Now(),
+		User: chatter.wallet.PubKey,
+		Text: "Connected to Room " + chatter.room.ID,
+		// Timestamp: time.Now(),
 	}
 	chatter.conn.WriteJSON(greet)
+
+	// Broadcast del messaggio di benvenuto agli altri utenti
+	// chatter.room.broadcast <- struct {
+	// 	Message []byte
+	// 	Sender  *Chatter
+	// }{
+	// 	Message: []byte(text),
+	// 	Sender:  chatter,
+	// }
 
 	go chatter.Read()
 	go chatter.Write()
 }
+
+// func Inizialiaze(room *Room, w http.ResponseWriter, req *http.Request) {
+
+// 	conn, err := upgrader.Upgrade(w, req, nil)
+// 	if err != nil {
+// 		log.Printf("Error during connection upgrade: %s", err)
+// 		return
+// 	}
+
+// 	chatter := &Chatter{room: room, conn: conn, send: make(chan []byte, 256),
+// 		wallet: blockchain.NewWallet(), blockchain: blockchain.Inizialize()}
+// 	chatter.room.register <- chatter
+
+// 	greet := Message{
+// 		User:      chatter.wallet.PubKey,
+// 		Text:      "Welcome Muddafakka",
+// 		Timestamp: time.Now(),
+// 	}
+// 	chatter.conn.WriteJSON(greet)
+
+// 	go chatter.Read()
+// 	go chatter.Write()
+// }

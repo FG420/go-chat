@@ -8,8 +8,9 @@ import (
 )
 
 type Room struct {
-	ID        string
-	chatters  map[*Chatter]bool
+	ID       string
+	chatters map[*Chatter]bool
+	// broadcast chan []byte
 	broadcast chan struct {
 		Message []byte
 		Sender  *Chatter
@@ -27,6 +28,7 @@ func NewRoom() *Room {
 			Message []byte
 			Sender  *Chatter
 		}),
+		// broadcast:  make(chan []byte),
 		register:   make(chan *Chatter),
 		unregister: make(chan *Chatter),
 		chatters:   make(map[*Chatter]bool),
@@ -45,16 +47,15 @@ func NewRoom() *Room {
 // 				close(chatter.send)
 // 			}
 
-// 		case messageAndSender := <-r.broadcast:
+// 		case mess := <-r.broadcast:
 // 			for chatter := range r.chatters {
-// 				if chatter != messageAndSender.Sender {
-// 					select {
-// 					case chatter.send <- messageAndSender.Message:
-// 					default:
-// 						close(chatter.send)
-// 						delete(r.chatters, chatter)
-// 					}
+// 				select {
+// 				case chatter.send <- mess:
+// 				default:
+// 					close(chatter.send)
+// 					delete(r.chatters, chatter)
 // 				}
+
 // 			}
 // 		}
 // 	}

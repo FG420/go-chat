@@ -2,35 +2,47 @@ import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, TextInput, Button, ScrollView, StyleSheet, NativeSyntheticEvent, TextInputChangeEventData } from 'react-native';
 
 const App: React.FC = () => {
-  const [msg, setMsg] = useState<string>('');
-  const [messages, setMessages] = useState<iMessage[]>([]); // Array di messaggi della chat
-  const logRef = useRef<ScrollView>(null);
-  const conn = useRef<WebSocket | null>(null);
+  const [msg, setMsg] = useState<string>('')
+  const [messages, setMessages] = useState<iMessage[]>([])
+  const logRef = useRef<ScrollView>(null)
+  const conn = useRef<WebSocket | null>(null)
+  const [users, setUsers] = useState<string[]>([])
 
-  // Stabilire la connessione WebSocket al caricamento del componente
   useEffect(() => {
     if (window.WebSocket) {
-      conn.current = new WebSocket('ws://localhost:8080/ws'); // Modifica con l'URL del tuo server WebSocket
+      conn.current = new WebSocket('ws://localhost:8080/ws');
 
-      // Quando un messaggio viene ricevuto dal WebSocket
       conn.current.onmessage = (evt: MessageEvent) => {
         const receivedMessage = evt.data.trim();
         console.log(JSON.parse(evt.data));
 
         const message: iMessage = JSON.parse(evt.data)
 
-        // Se il messaggio contiene "si è appena collegato", lo visualizziamo in modo speciale
         if (receivedMessage.includes("Connected")) {
           setMessages((prevMessages) => [
             ...prevMessages,
-            { id: prevMessages.length, text: message.text, sender: 'System', timestamp: "", user: "" }, // Etichetta come System
+            { id: prevMessages.length, text: message.text, sender: 'System', timestamp: "", user: message.user }, // Etichetta come System
           ]);
+
+          setUsers((prevUsers) => [
+            ...prevUsers, message.user!
+          ])
+          console.log(messages)
+          console.log(users)
+
         } else {
           // Messaggio normale
           setMessages((prevMessages) => [
             ...prevMessages,
             { id: prevMessages.length, text: message.text, sender: 'Other', timestamp: message.timestamp, user: message.user },
           ]);
+
+          setUsers((prevUsers) => [
+            ...prevUsers, message.user!
+          ])
+
+          console.log(messages)
+          console.log(users)
         }
       };
 
@@ -59,6 +71,7 @@ const App: React.FC = () => {
   const handleSubmit = () => {
     if (conn.current && msg.trim()) {
       conn.current.send(msg);
+
       setMessages((prevMessages) => [
         ...prevMessages,
         { id: prevMessages.length, text: msg, sender: 'You', timestamp: new Date().toLocaleString() },
@@ -117,6 +130,10 @@ const App: React.FC = () => {
       <View style={styles.usersContainer}>
         <Text style={styles.usersTitle}>Users</Text>
         {/* Aggiungere la lista degli utenti (puoi implementare il meccanismo sul server) */}
+        {messages.map((message) => (
+          <Text>{message.sender}: {message.user}</Text>
+        ))}
+
       </View>
     </View>
   );
@@ -156,6 +173,7 @@ const styles = StyleSheet.create({
   systemMessage: {
     backgroundColor: '#D3D3D3', // Grigio chiaro per i messaggi di sistema
     alignSelf: 'center',
+    color: '#000',
     fontStyle: 'italic',
     maxWidth: '90%',
     paddingVertical: 10,

@@ -53,6 +53,7 @@ func (chatter *Chatter) Read() {
 		}
 
 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
+
 		chatter.room.broadcast <- struct {
 			Message []byte
 			Sender  *Chatter
@@ -64,15 +65,13 @@ func (chatter *Chatter) Read() {
 }
 
 func (chatter *Chatter) Write() {
+	var message Message
+
 	ticker := time.NewTicker(9600 * time.Second)
 	defer func() {
 		ticker.Stop()
 		chatter.conn.Close()
 	}()
-
-	// log.Println(chatter.room.chatters[chatter])
-	log.Println(chatter.conn.RemoteAddr())
-	// log.Println(len(chatter.room.chatters))
 
 	for {
 		select {
@@ -82,64 +81,24 @@ func (chatter *Chatter) Write() {
 				return
 			}
 
-			var message Message
 			writer, err := chatter.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 
-			// for c := range chatter.room.chatters {
+			message.User = chatter.wallet.PubKey
+			message.Text = string(mess)
+			message.Timestamp = time.Now()
 
-			// 	if chatter != c {
-			// 		message.User = c.wallet.PubKey
-			// 		message.Text = string(mess)
-			// 		message.Timestamp = time.Now()
-
-			// 		byted, err := json.Marshal(message)
-			// 		if err != nil {
-			// 			log.Panic(err)
-			// 		}
-			// 		writer.Write([]byte{'\n'})
-			// 		// writer.Write(<-chatter.send)
-			// 		writer.Write(byted)
-			// 	}
-			// }
-
-			// for c := range chatter.room.chatters {
-			// 	if chatter != c {
-			// 		log.Println(chatter)
-			// 		message.User = chatter.wallet.PubKey
-			// 		message.Text = string(mess)
-			// 		message.Timestamp = time.Now()
-
-			// 	}
-
-			// }
-
-			// writer.Write([]byte{'\n'})
-			// writer.Write(<-chatter.send)
-			// writer.Write(byted)
-
-			// log.Println(message)
-
-			for c := range chatter.room.chatters {
-
-				message.User = c.wallet.PubKey
-				message.Text = string(mess)
-				message.Timestamp = time.Now()
-
-			}
 			byted, err := json.Marshal(message)
 			if err != nil {
 				log.Panic(err)
 			}
-
 			writer.Write(byted)
 
 			for i := 0; i < len(chatter.send); i++ {
 				writer.Write([]byte{'\n'})
 				writer.Write(<-chatter.send)
-				// writer.Write(byted)
 			}
 
 			if err := writer.Close(); err != nil {

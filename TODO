@@ -1,0 +1,4 @@
+!!TODO
+
+Chatter.go
+  - Try "receivers" instead of "sender" in the Read() func

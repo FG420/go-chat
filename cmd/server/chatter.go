@@ -21,7 +21,7 @@ type (
 	Chatter struct {
 		room       *Room
 		conn       *websocket.Conn
-		send       chan []byte
+		send       chan Message
 		wallet     *blockchain.Wallet
 		blockchain *blockchain.Blockchain
 	}
@@ -54,18 +54,13 @@ func (chatter *Chatter) Read() {
 
 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
 
-		chatter.room.broadcast <- struct {
-			Message []byte
-			Sender  *Chatter
-		}{
-			Message: mess,
-			Sender:  chatter,
-		}
+		message := Message{User: chatter.wallet.PubKey, Text: string(mess), Timestamp: time.Now()}
+		chatter.room.broadcast <- message
 	}
 }
 
 func (chatter *Chatter) Write() {
-	var message Message
+	// var message Message
 
 	ticker := time.NewTicker(9600 * time.Second)
 	defer func() {
@@ -81,16 +76,26 @@ func (chatter *Chatter) Write() {
 				return
 			}
 
+			log.Println(mess)
+
+			// message.User = chatter.wallet.PubKey
+			// message.Text = string(mess)
+			// message.Timestamp = time.Now()
+
+			// if err := chatter.conn.WriteJSON(mess); err != nil {
+			// 	log.Panic(err)
+			// }
+
 			writer, err := chatter.conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 
-			message.User = chatter.wallet.PubKey
-			message.Text = string(mess)
-			message.Timestamp = time.Now()
+			// message.User = chatter.wallet.PubKey
+			// message.Text = string(mess)
+			// message.Timestamp = time.Now()
 
-			byted, err := json.Marshal(message)
+			byted, err := json.Marshal(mess)
 			if err != nil {
 				log.Panic(err)
 			}
@@ -98,7 +103,7 @@ func (chatter *Chatter) Write() {
 
 			for i := 0; i < len(chatter.send); i++ {
 				writer.Write([]byte{'\n'})
-				writer.Write(<-chatter.send)
+				// writer.Write(<-chatter.send)
 			}
 
 			if err := writer.Close(); err != nil {
@@ -122,9 +127,10 @@ func Inizialiaze(room *Room, w http.ResponseWriter, req *http.Request) {
 	}
 
 	chatter := &Chatter{
-		room:       room,
-		conn:       conn,
-		send:       make(chan []byte, 256),
+		room: room,
+		conn: conn,
+		// send:       make(chan []byte, 256)
+		send:       make(chan Message),
 		wallet:     blockchain.NewWallet(),
 		blockchain: blockchain.Inizialize(),
 	}

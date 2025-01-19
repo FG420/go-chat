@@ -1,6 +1,7 @@
 package server
 
 import (
+	"bytes"
 	"strconv"
 	"time"
 
@@ -11,10 +12,11 @@ type Room struct {
 	ID       string
 	chatters map[*Chatter]bool
 	// broadcast chan []byte
-	broadcast chan struct {
-		Message []byte
-		Sender  *Chatter
-	}
+	// broadcast chan struct {
+	// 	Message []byte
+	// 	Sender  *Chatter
+	// }
+	broadcast  chan Message
 	register   chan *Chatter
 	unregister chan *Chatter
 }
@@ -23,11 +25,12 @@ func NewRoom() *Room {
 	source := rand.NewSource(time.Now().Unix())
 	r := rand.New(source)
 	return &Room{
-		ID: strconv.Itoa(r.Int()),
-		broadcast: make(chan struct {
-			Message []byte
-			Sender  *Chatter
-		}),
+		ID:        strconv.Itoa(r.Int()),
+		broadcast: make(chan Message),
+		// broadcast: make(chan struct {
+		// 	Message []byte
+		// 	Sender  *Chatter
+		// }),
 		// broadcast:  make(chan []byte),
 		register:   make(chan *Chatter),
 		unregister: make(chan *Chatter),
@@ -73,11 +76,11 @@ func (r *Room) Run() {
 				close(chatter.send)
 			}
 
-		case messageAndSender := <-r.broadcast:
+		case message := <-r.broadcast:
 			for chatter := range r.chatters {
-				if chatter != messageAndSender.Sender {
+				if !bytes.Equal(chatter.wallet.PubKey, message.User) {
 					select {
-					case chatter.send <- messageAndSender.Message:
+					case chatter.send <- message:
 					default:
 						close(chatter.send)
 						delete(r.chatters, chatter)

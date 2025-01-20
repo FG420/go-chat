@@ -2,6 +2,7 @@ package server
 
 import (
 	"bytes"
+	"log"
 	"strconv"
 	"time"
 
@@ -77,16 +78,27 @@ func (r *Room) Run() {
 			}
 
 		case message := <-r.broadcast:
+			var c *Chatter
+			var chatters []*Chatter
 			for chatter := range r.chatters {
 				if !bytes.Equal(chatter.wallet.PubKey, message.User) {
+					chatters = append(chatters, chatter)
 					select {
 					case chatter.send <- message:
 					default:
 						close(chatter.send)
 						delete(r.chatters, chatter)
 					}
+				} else {
+					c = chatter
 				}
 			}
+
+			for _, chas := range chatters {
+				tx := c.wallet.Send(chas.wallet.PubKey, message.Text)
+				log.Println(tx)
+			}
+
 		}
 	}
 }

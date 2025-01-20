@@ -56,6 +56,7 @@ func (chatter *Chatter) Read() {
 
 		message := Message{User: chatter.wallet.PubKey, Text: string(mess), Timestamp: time.Now()}
 		chatter.room.broadcast <- message
+
 	}
 }
 
@@ -76,7 +77,7 @@ func (chatter *Chatter) Write() {
 				return
 			}
 
-			log.Println(mess)
+			// log.Println(mess)
 
 			// message.User = chatter.wallet.PubKey
 			// message.Text = string(mess)

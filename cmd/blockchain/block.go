@@ -17,9 +17,9 @@ type Block struct {
 }
 
 func (b *Block) AddTransaction(tx *Transaction) *Block {
-	if !bytes.Equal(b.Transactions[len(b.Transactions)-1].FromPubKey, tx.FromPubKey) {
-		log.Panic("Error Block not found")
-	}
+	// if !bytes.Equal(b.Transactions[len(b.Transactions)-1].FromPubKey, tx.FromPubKey) {
+	// 	log.Panic("Error Block not found")
+	// }
 
 	b.Transactions = append(b.Transactions, tx)
 

@@ -1,4 +1,13 @@
 !!TODO
 
 Chatter.go
-  - Try "receivers" instead of "sender" in the Read() func
+  - Write func needs to return the struct of the message (User: ..., Text: ..., Timestamp: ...)
+
+
+Transaction.go
+  - Implements new func for the encryption of the Data field for possible Implementation of a db
+
+
+after all this 2-check the files for other Implementations.
+
+DONE WITH THAT GO in the frontend 

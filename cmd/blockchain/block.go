@@ -16,11 +16,10 @@ type Block struct {
 	Timestamp    int64
 }
 
-func (b *Block) AddTransaction(tx *Transaction) *Block {
-	// if !bytes.Equal(b.Transactions[len(b.Transactions)-1].FromPubKey, tx.FromPubKey) {
-	// 	log.Panic("Error Block not found")
-	// }
-
+func (b *Block) AddTransaction(tx *Transaction, key []byte) *Block {
+	if ok := tx.ValidateTx(key); !ok {
+		log.Panic("transaction not valid: wallet pub key not verify")
+	}
 	b.Transactions = append(b.Transactions, tx)
 
 	return b

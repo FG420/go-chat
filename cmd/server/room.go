@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"math/rand"
+
+	"github.com/GF420/go-chat/cmd/blockchain"
 )
 
 type Room struct {
@@ -94,11 +96,15 @@ func (r *Room) Run() {
 				}
 			}
 
+			b := blockchain.CreateBlock(&c.blockchain.Blocks[len(c.blockchain.Blocks)-1], c.blockchain.Blocks[len(c.blockchain.Blocks)-1].Transactions[len(c.blockchain.Blocks[len(c.blockchain.Blocks)-1].Transactions)-1])
 			for _, chas := range chatters {
 				tx := c.wallet.Send(chas.wallet.PubKey, message.Text)
-				log.Println(tx)
+				b.AddTransaction(tx, c.wallet.PubKey)
 			}
 
+			for _, tx := range b.Transactions {
+				log.Println(tx.Data)
+			}
 		}
 	}
 }

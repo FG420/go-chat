@@ -52,12 +52,12 @@ func TestMultipleSend(t *testing.T) {
 	time.Sleep(500)
 	data1 := "cazzone che sei, scemo"
 	tx1 := pino.Send(gino.PubKey, data1)
-	b.AddTransaction(tx1)
+	b.AddTransaction(tx1, pino.PubKey)
 
 	time.Sleep(500)
 	data2 := "però ti voglio pene!"
 	tx2 := pino.Send(gino.PubKey, data2)
-	b.AddTransaction(tx2)
+	b.AddTransaction(tx2, pino.PubKey)
 
 	bc.AddBlock(b)
 	bc.Format()

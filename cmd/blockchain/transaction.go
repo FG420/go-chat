@@ -1,6 +1,9 @@
 package blockchain
 
-import "time"
+import (
+	"bytes"
+	"time"
+)
 
 type (
 	Transaction struct {
@@ -17,6 +20,15 @@ func (tx *Transaction) NewTransaction(fromKey, toKey []byte, data any) *Transact
 	return &Transaction{fromKey, toKey, data, time.Now().Unix()}
 }
 
-func (tx *Transaction) ValidateTx() bool {
-	return false
+func (tx *Transaction) ValidateTx(key []byte) bool {
+	if !bytes.Equal(tx.FromPubKey, key) {
+		return false
+	} else {
+		return true
+	}
+}
+
+// TODO
+func (tx *Transaction) EncypedData() *Transaction {
+	return tx
 }

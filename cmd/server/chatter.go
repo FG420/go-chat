@@ -1,7 +1,6 @@
 package server
 
 import (
-	"bytes"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -27,9 +26,9 @@ type (
 	}
 
 	Message struct {
-		User      []byte    `json:"user"`
-		Text      string    `json:"text"`
-		Timestamp time.Time `json:"timestamp"`
+		User      []byte `json:"user"`
+		Text      string `json:"text"`
+		Timestamp int64  `json:"timestamp"`
 	}
 )
 
@@ -40,25 +39,53 @@ func (chatter *Chatter) Read() {
 	}()
 
 	for {
-		_, mess, err := chatter.conn.ReadMessage()
+		var message Message
+
+		err := chatter.conn.ReadJSON(&message)
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("error: %v", err)
-				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
-			} else {
-				log.Printf("error: %v", err)
-				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
-			}
+			log.Printf("error: %v", err)
 			break
 		}
 
-		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
-
-		message := Message{User: chatter.wallet.PubKey, Text: string(mess), Timestamp: time.Now()}
+		log.Println(message)
 		chatter.room.broadcast <- message
-
 	}
 }
+
+// func (chatter *Chatter) Read() {
+// 	defer func() {
+// 		chatter.room.unregister <- chatter
+// 		chatter.conn.Close()
+// 	}()
+
+// 	for {
+// 		_, mess, err := chatter.conn.ReadMessage()
+// 		if err != nil {
+// 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+// 				log.Printf("error: %v", err)
+// 				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
+// 			} else {
+// 				log.Printf("error: %v", err)
+// 				chatter.conn.WriteJSON(Message{User: chatter.wallet.PubKey, Text: "This User left the room", Timestamp: time.Now()})
+// 			}
+// 			break
+// 		}
+
+// 		mess = bytes.TrimSpace(bytes.Replace(mess, []byte{'\n'}, []byte{' '}, -1))
+
+// 		log.Println(string(mess))
+
+// 		// if err := json.Unmarshal(mess, &mex); err != nil {
+// 		// 	log.Panic(err)
+// 		// }
+
+// 		message := Message{User: chatter.wallet.PubKey, Text: string(mess), Timestamp: time.Now()}
+// 		log.Println(message)
+
+// 		chatter.room.broadcast <- message
+
+// 	}
+// }
 
 func (chatter *Chatter) Write() {
 	// var message Message
@@ -139,9 +166,9 @@ func Inizialiaze(room *Room, w http.ResponseWriter, req *http.Request) {
 	chatter.room.register <- chatter
 
 	greet := Message{
-		User: chatter.wallet.PubKey,
-		Text: "Connected to Room " + chatter.room.ID,
-		// Timestamp: time.Now(),
+		User:      chatter.wallet.PubKey,
+		Text:      "Connected to Room " + chatter.room.ID,
+		Timestamp: time.Now().Unix(),
 	}
 	chatter.conn.WriteJSON(greet)
 

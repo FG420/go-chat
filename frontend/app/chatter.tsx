@@ -32,6 +32,8 @@ const App: React.FC = () => {
 
                 } else {
                     // Messaggio normale
+
+                    console.log( "normale", messages )
                     setMessages( ( prevMessages ) => [
                         ...prevMessages,
                         { id: prevMessages.length, text: message.text, sender: 'Other', timestamp: message.timestamp, user: message.user },
@@ -49,13 +51,13 @@ const App: React.FC = () => {
             conn.current.onclose = () => {
                 setMessages( ( prevMessages ) => [
                     ...prevMessages,
-                    { id: prevMessages.length, text: 'Connection closed.', sender: 'System', timestamp: "" },
+                    { id: prevMessages.length, text: 'Connection closed.', sender: 'System', timestamp: "", user: null },
                 ] );
             };
         } else {
             setMessages( ( prevMessages ) => [
                 ...prevMessages,
-                { id: prevMessages.length, text: 'Your browser does not support WebSockets.', sender: 'System', timestamp: "" },
+                { id: prevMessages.length, text: 'Your browser does not support WebSockets.', sender: 'System', timestamp: "", user: null },
             ] );
         }
 
@@ -70,11 +72,24 @@ const App: React.FC = () => {
     // Funzione per inviare il messaggio
     const handleSubmit = () => {
         if ( conn.current && msg.trim() ) {
-            conn.current.send( msg );
+
+            const mex: iMessage = {
+                user: messages[ 0 ].user,
+                text: msg.trim(),
+                timestamp: Date.now(),
+                id: messages[ 0 ].id,
+                sender: 'You'
+            }
+            console.log( "handle", JSON.stringify( mex ) )
+            // const mex: iMessage = {
+            //     user : 
+            // }
+
+            conn.current.send( JSON.stringify( mex ) );
 
             setMessages( ( prevMessages ) => [
                 ...prevMessages,
-                { id: prevMessages.length, text: msg, sender: 'You', timestamp: new Date().toLocaleString() },
+                { id: prevMessages.length, text: msg, sender: 'You', timestamp: new Date().toLocaleString(), user: null },
             ] );
             setMsg( '' );
         }

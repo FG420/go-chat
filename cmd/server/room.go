@@ -2,7 +2,6 @@ package server
 
 import (
 	"bytes"
-	"log"
 	"strconv"
 	"time"
 
@@ -100,10 +99,6 @@ func (r *Room) Run() {
 			for _, chas := range chatters {
 				tx := c.wallet.Send(chas.wallet.PubKey, message.Text)
 				b.AddTransaction(tx, c.wallet.PubKey)
-			}
-
-			for _, tx := range b.Transactions {
-				log.Println(tx.Data)
 			}
 		}
 	}

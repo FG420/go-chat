@@ -10,6 +10,10 @@ import (
 func main() {
 	log.Println("Server starting at port 8080...")
 
+	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+		server.LoginHandler(w, req)
+	})
+
 	room := server.NewRoom()
 	go room.Run()
 	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {

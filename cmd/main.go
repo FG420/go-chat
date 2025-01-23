@@ -7,10 +7,16 @@ import (
 	"github.com/GF420/go-chat/cmd/server"
 )
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+}
+
 func main() {
 	log.Println("Server starting at port 8080...")
 
 	http.HandleFunc("/login", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+		enableCors(&w)
 		server.LoginHandler(w, req)
 	})
 

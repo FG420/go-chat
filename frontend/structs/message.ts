@@ -9,5 +9,5 @@ interface iMessage {
 interface Send {
     user: string,
     text: string,
-    timestamp: 
+    // timestamp: 
 }

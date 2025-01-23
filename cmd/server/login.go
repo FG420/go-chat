@@ -15,7 +15,6 @@ type Login struct {
 }
 
 func LoginHandler(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Content-type", "application/json")
 	var login Login
 
 	switch req.Method {

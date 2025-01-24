@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -69,6 +70,7 @@ func DecodeJSONBody(w http.ResponseWriter, req *http.Request, dst interface{}) e
 		}
 	}
 
+	log.Println(req.Body)
 	// validateFields(&dst)
 
 	err = dec.Decode(&struct{}{})
@@ -87,3 +89,5 @@ func DecodeJSONBody(w http.ResponseWriter, req *http.Request, dst interface{}) e
 // 	}
 // 	return nil
 // }
+
+// func NewJWT(data *)

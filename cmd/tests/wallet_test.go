@@ -27,7 +27,7 @@ func TestSend(t *testing.T) {
 	pino := blockchain.NewWallet()
 	gino := blockchain.NewWallet()
 
-	data := "Sei un mona"
+	data := "Chi sei?"
 	tx := pino.Send(gino.PubKey, data)
 	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
 	bc.AddBlock(b)
@@ -45,17 +45,17 @@ func TestMultipleSend(t *testing.T) {
 	pino := blockchain.NewWallet()
 	gino := blockchain.NewWallet()
 
-	data := "mona coglione"
+	data := "ciao"
 	tx := pino.Send(gino.PubKey, data)
 	b := blockchain.CreateBlock(&bc.Blocks[len(bc.Blocks)-1], tx)
 
 	time.Sleep(500)
-	data1 := "cazzone che sei, scemo"
+	data1 := "che scemo sei"
 	tx1 := pino.Send(gino.PubKey, data1)
 	b.AddTransaction(tx1, pino.PubKey)
 
 	time.Sleep(500)
-	data2 := "però ti voglio pene!"
+	data2 := "però ti voglio bene!"
 	tx2 := pino.Send(gino.PubKey, data2)
 	b.AddTransaction(tx2, pino.PubKey)
 
